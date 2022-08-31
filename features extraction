@@ -116,9 +116,26 @@ for i in range(0, User_1.shape[0]-window_size, step_size):
     Ay_list.append(Ays)
     Az_list.append(Azs)
     
-##### X-axis gyroscope ######
+##### Feature extraction ==== X-axis gyroscope ######
     
 Gx_list=pd.DataFrame(Gx_list)
 Gx_list=Gx_list.astype(float)
 Gx_list_trans=Gx_list.T
 print(Gx_list_trans)
+
+from tsfresh import extract_features
+l=[]
+m=[]
+z=[]
+u=[]
+X=[]
+for i in range ( Gx_list_trans.shape[1]):
+    p=Gx_list_trans.iloc[:,i]
+    p=pd.DataFrame(p)
+    p['ID'] = '1'
+    X = extract_features(p, column_id='ID')
+    #print(X.shape)
+    l.append(X)
+    #m.append(l)
+    z=l
+u=z 
