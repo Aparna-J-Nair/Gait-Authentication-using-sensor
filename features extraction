@@ -1,0 +1,124 @@
+#####IMPORTING LIBRARIES####
+
+import numpy as np
+import pandas as pd
+import functools
+import itertools
+import warnings
+from builtins import range
+from collections import defaultdict
+
+import matrixprofile as mp
+import numpy as np
+import pandas as pd
+import stumpy
+from matrixprofile.exceptions import NoSolutionPossible
+from numpy.linalg import LinAlgError
+from scipy.signal import cwt, find_peaks_cwt, ricker, welch
+from scipy.stats import linregress
+from statsmodels.tools.sm_exceptions import MissingDataError
+
+from tsfresh.utilities.string_manipulation import convert_to_output_format
+
+with warnings.catch_warnings():
+    # Ignore warnings of the patsy package
+    warnings.simplefilter("ignore", DeprecationWarning)
+
+    from statsmodels.tsa.ar_model import AR
+
+from statsmodels.tsa.stattools import acf, adfuller, pacf
+
+
+
+
+#####Loading gyroscope data########
+
+v_g=[]
+o_g=[]
+p_g=[]
+k_g=[]
+data_1g=[]
+
+with open("") as in_file_g:                           #### Add Path
+    for line_g in in_file_g:
+        if line_g.strip() == "Info: ========= Hands Left Corridor Walk Started! ======":
+            for line_g in in_file_g:
+                if line_g.strip() == "Info: ========= Hands Left Corridor Walk Stopped! ======":
+                    break
+                #print(line)
+                data_1g=line_g
+                data_1g = data_1g.strip()
+                data_1g = data_1g.split(",")
+                #print(data_1)
+                v_g.append(data_1g)
+                o_g=v_g
+p_g=o_g  
+
+
+####### Loading accelerometer data #####
+v_a=[]
+o_a=[]
+p_a=[]
+k_a=[]
+data_1a=[]
+
+with open("D:\\M-Tech-Data-Science\\PROJECT\\dataset\\Phone1_Sensor_org/User9\Training/LinAcc.txt") as in_file_a:
+    for line_a in in_file_a:
+        if line_a.strip() == "Info: ========= Hands Left Corridor Walk Started! ======":
+            for line_a in in_file_a:
+                if line_a.strip() == "Info: ========= Hands Left Corridor Walk Stopped! ======":
+                    break
+                #print(line)
+                data_1a=line_a
+                data_1a = data_1a.strip()
+                data_1a = data_1a.split(",")
+                #print(data_1)
+                v_a.append(data_1a)
+                o_a=v_a
+p_a=o_a  
+
+
+###### Arranging Data #####
+
+s=pd.concat([p_g, p_a], axis=1,ignore_index=True)
+s.columns=['Gx','Gy','Gz','T1g','T2g','Ax','Ay','Az','Timestamp','T2a']
+User_1=s.drop(columns=['T1g','T2g','T2a','Timestamp'])
+User_1=pd.DataFrame(User_1)
+
+
+###### Windowing ######
+
+Gx_list = []
+Gy_list = []
+Gz_list = []
+Ax_list = []
+Ay_list = []
+Az_list = []
+#train_labels = []
+
+window_size =20
+step_size = 10
+
+# creating overlaping windows of size window-size 100
+for i in range(0, User_1.shape[0]-window_size, step_size):
+    Gxs = User_1['Gx'].values[i: i + window_size]
+    Gys = User_1['Gy'].values[i: i + window_size]
+    Gzs = User_1['Gz'].values[i: i + window_size]
+    Axs = User_1['Ax'].values[i: i + window_size]
+    Ays = User_1['Ay'].values[i: i + window_size]
+    Azs = User_1['Az'].values[i: i + window_size]
+    #label = stats.mode(df_train['activity'][i: i + 100])[0][0]
+
+    Gx_list.append(Gxs)
+    Gy_list.append(Gys)
+    Gz_list.append(Gzs)
+    Ax_list.append(Axs)
+    Ay_list.append(Ays)
+    Az_list.append(Azs)
+    
+##### X-axis gyroscope ######
+    
+Gx_list=pd.DataFrame(Gx_list)
+Gx_list=Gx_list.astype(float)
+Gx_list_trans=Gx_list.T
+print(Gx_list_trans)
